@@ -1,110 +1,337 @@
 package com.mo.ie.meetingorganizer.fragments;
 
+
+
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
-import android.net.Uri;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.annotation.UiThread;
+import android.support.design.widget.FloatingActionButton;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.support.v7.app.ActionBarDrawerToggle;
 
 import com.mo.ie.R;
+import com.mo.ie.meetingorganizer.activities.Base;
+import com.mo.ie.meetingorganizer.activities.Home;
+import com.mo.ie.meetingorganizer.adapters.MeetingListAdapter;
+import com.mo.ie.meetingorganizer.controllers.MeetingController;
+import com.mo.ie.meetingorganizer.models.Meeting;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link TodayFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link TodayFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class TodayFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
-
+public class TodayFragment extends Fragment implements AbsListView.MultiChoiceModeListener, AdapterView.OnItemClickListener , View.OnClickListener
+{
+    protected static MeetingListAdapter listAdapter;
+    // protected ListView listView;
+    //protected         CoffeeFilter        coffeeFilter;
+    public            boolean             favourites = false;
+    protected TextView titleBar;
+    //ArrayList<Integer> selectedIndex = new ArrayList<>();
+    //MeetingListFragment listFragment;
+    private FloatingActionButton floatingActionButton;
+    public ActionMode mode;
+    public List<Meeting> meetings;
+    MeetingListAdapter adapter;
+    //MeetingListType listType;
+    public ListView listView;
+    public TextView textViewNoMeeting;
+    Button buttonShowPrevious;
+    Boolean showAll = false;
+    ArrayList<Integer> selectedIndex = new ArrayList<>();
+    MeetingListType listType;
     public TodayFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment TodayFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static TodayFragment newInstance(String param1, String param2) {
-        TodayFragment fragment = new TodayFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
+    public static MeetingFragment newInstance() {
+        MeetingFragment fragment = new MeetingFragment();
         return fragment;
+    }
+
+    @Override
+    public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+        if (checked)
+            selectedIndex.add(position);
+        else
+            selectedIndex.remove(Integer.valueOf(position));
+    }
+
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.main_action_menu, menu);
+
+        this.mode = mode;
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return true;
+    }
+
+    @Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_delete:
+                deleteSelected(mode);
+                return true;
+            case R.id.action_select_all:
+                selectedIndex.clear();
+                for (int i = 0; i < listView.getCount(); i++) {
+                    listView.setItemChecked(i, true);
+                }
+                return true;
+            case R.id.action_move:
+                moveToDate(mode);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+        //this.activity = (Base) context;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        meetings.addAll(MeetingController.getInstance().getMeetingsToday());
+
+    }
+    @Override
+    public void onDestroyActionMode(ActionMode mode) {
+        selectedIndex.clear();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_today, container, false);
-    }
+        View v;
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
+        v = inflater.inflate(R.layout.fragment_home, container, false);
 
+        listView =              (ListView) v.findViewById(R.id.listView);
+
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+
+        listView.setMultiChoiceModeListener(this);
+        listView.setOnItemClickListener(this);
+
+
+        return v;
+    }
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+    public void onResume() {
+        super.onResume();
+
+        List<Meeting> valueList = new ArrayList<>(Base.app.dbManager.loadMeetings().values());
+//        titleBar = (TextView)getActivity().findViewById(R.id.recentAddedBarTextView);
+//        titleBar.setText(R.string.recentlyViewedLbl);
+//        ((TextView)getActivity().findViewById(R.id.empty_list_view)).setText(R.string.recentlyViewedEmptyMessage);
+        listAdapter = new MeetingListAdapter(getActivity(), this, valueList);
+//        coffeeFilter = new CoffeeFilter(Base.app.dbManager.getAll(),"all",listAdapter);
+        listAdapter.notifyDataSetChanged();
+
+
+
+        // ((TextView)getActivity().findViewById(R.id.empty_list_view)).setText(R.string.recentlyViewedEmptyMessage);
+//        //coffeeFilter = new CoffeeFilter(Base.app.dbManager.getAll(),"all",listAdapter);
+
+//        if (favourites) {
+//            titleBar.setText(R.string.favouritesCoffeeLbl);
+//            ((TextView)getActivity().findViewById(R.id.empty_list_view)).setText(R.string.favouritesEmptyMessage);
+//
+//            coffeeFilter.setFilter("favourites"); // Set the filter text field from 'all' to 'favourites'
+//            coffeeFilter.filter(null); // Filter the data, but don't use any prefix
+//            listAdapter.notifyDataSetChanged(); // Update the adapter
+//        }
+        listView.setAdapter (listAdapter);
+        listView.setOnItemClickListener(this);
+        listView.setEmptyView(getActivity().findViewById(R.id.textViewNoMeetings));
+
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        // mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+
+
+    @Override
+    public void onStart()
+    {
+        super.onStart();
     }
+
+    @Override
+    public void onClick(View view)
+    {
+        if (view.getTag() instanceof Meeting)
+        {
+            onMeetingDelete ((Meeting) view.getTag());
+        }
+    }
+
+    public void onMeetingDelete(final Meeting meeting)
+    {
+        String stringName = meeting.title;
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage("Are you sure you want to Delete this \'Meeting\' " + stringName + "?");
+        builder.setCancelable(false);
+
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int id)
+            {
+                Base.app.dbManager.deleteMeeting(meeting); // remove from our list
+                listAdapter.meetingList.remove(meeting); // update adapters data
+                listAdapter.notifyDataSetChanged(); // refresh adapter
+            }
+        }).setNegativeButton("No", new DialogInterface.OnClickListener()
+        {
+            public void onClick(DialogInterface dialog, int id)
+            {
+                dialog.cancel();
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Home mainActivity = (Home) getActivity();
+        mainActivity.showAddFragment(listAdapter.getItem(position));
+    }
+
+    private void deleteSelected(final ActionMode mode) {
+        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
+        builder.setMessage("Delete Selected Meetings?");
+        builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                for (Integer index : selectedIndex) {
+                    MeetingController.getInstance().deleteMeeting(listAdapter.getItem(index));
+                }
+                mode.finish();
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.show();
+    }
+
+    private void moveToDate(final ActionMode mode) {
+        Meeting meetingTemp = listAdapter.getItem(selectedIndex.get(0));
+        new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                for (int i = 0; i < selectedIndex.size(); i++) {
+                    Meeting meeting = listAdapter.getItem(i);
+                    meeting.startDateTime.setYear(year);
+                    meeting.startDateTime.setMonthOfYear(monthOfYear + 1);
+                    meeting.startDateTime.setDayOfMonth(dayOfMonth);
+
+                    meeting.endDateTime.setYear(year);
+                    meeting.endDateTime.setMonthOfYear(monthOfYear + 1);
+                    meeting.endDateTime.setDayOfMonth(dayOfMonth);
+
+                    MeetingController.getInstance().createMeeting(meeting);
+                }
+                mode.finish();
+            }
+        }, meetingTemp.startDateTime.getYear(), meetingTemp.startDateTime.getMonthOfYear() - 1, meetingTemp.startDateTime.getDayOfMonth()).show();
+    }
+
+    @UiThread
+    private void updateList() {
+        meetings.clear();
+
+        switch (listType) {
+            case MEETING_LIST_TYPE_TODAY:
+                textViewNoMeeting.setText("No Meetings Today");
+                meetings.addAll(MeetingController.getInstance().getMeetingsToday());
+                break;
+            case MEETING_LIST_TYPE_TOMORROW:
+                textViewNoMeeting.setText("No Meetings Tomorrow");
+                meetings.addAll(MeetingController.getInstance().getMeetingsTomorrow());
+                break;
+            case MEETING_LIST_TYPE_ALL:
+                textViewNoMeeting.setText("No Meetings");
+                meetings.addAll(MeetingController.getInstance().meetings.values());
+                break;
+        }
+
+        List<Meeting> deleteList = new ArrayList<>();
+
+        for (Meeting meeting : meetings) {
+            if (meeting.endDateTime.isBeforeNow())
+                deleteList.add(meeting);
+        }
+
+
+        if (!showAll) {
+            meetings.removeAll(deleteList);
+
+            if (deleteList.size() == 0)
+                buttonShowPrevious.setVisibility(View.GONE);
+            else {
+                buttonShowPrevious.setVisibility(View.VISIBLE);
+                buttonShowPrevious.setText("Show Previous Meetings");
+            }
+        } else {
+            if (deleteList.size() == 0)
+                buttonShowPrevious.setVisibility(View.GONE);
+            else {
+                buttonShowPrevious.setVisibility(View.VISIBLE);
+                buttonShowPrevious.setText("Hide Previous Meetings");
+            }
+        }
+
+
+        Collections.sort(meetings, new Comparator<Meeting>() {
+            @Override
+            public int compare(Meeting lhs, Meeting rhs) {
+                return lhs.startDateTime.compareTo(rhs.startDateTime);
+            }
+        });
+
+    }
+    public enum MeetingListType implements Serializable {
+        MEETING_LIST_TYPE_TODAY, MEETING_LIST_TYPE_TOMORROW, MEETING_LIST_TYPE_ALL
+    }
+
+
 }
+
+

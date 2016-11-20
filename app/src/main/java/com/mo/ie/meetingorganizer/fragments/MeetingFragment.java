@@ -7,10 +7,15 @@ import android.app.DatePickerDialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.UiThread;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,10 +38,13 @@ import com.mo.ie.meetingorganizer.adapters.MeetingListAdapter;
 import com.mo.ie.meetingorganizer.controllers.MeetingController;
 import com.mo.ie.meetingorganizer.models.Meeting;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-import static android.R.attr.mode;
+import static java.util.Collections.addAll;
 
 
 public class MeetingFragment extends Fragment implements AbsListView.MultiChoiceModeListener, AdapterView.OnItemClickListener , View.OnClickListener
@@ -50,11 +58,11 @@ public class MeetingFragment extends Fragment implements AbsListView.MultiChoice
     //MeetingListFragment listFragment;
     private FloatingActionButton floatingActionButton;
     public ActionMode mode;
-    List<Meeting> meetings;
-    MeetingListAdapter adapter;
-    //MeetingListType listType;
-    ListView listView;
-    TextView textViewNoMeeting;
+    public List<Meeting> meetings;
+
+    List<Meeting> valueList;
+    public ListView listView;
+    static TextView textViewNoMeeting;
     Button buttonShowPrevious;
     Boolean showAll = false;
     ArrayList<Integer> selectedIndex = new ArrayList<>();
@@ -132,17 +140,41 @@ public class MeetingFragment extends Fragment implements AbsListView.MultiChoice
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v;
 
-        v = inflater.inflate(R.layout.fragment_home, container, false);
 
-        listView =              (ListView) v.findViewById(R.id.listView);
 
+
+        View v = inflater.inflate(R.layout.fragment_home, container, false);
+        meetings = new ArrayList<>();
+        listAdapter = new MeetingListAdapter(getActivity(), this, meetings);
+
+        textViewNoMeeting = (TextView) v.findViewById(R.id.textViewNoMeetings);
+        buttonShowPrevious = (Button) v.findViewById(R.id.buttonShowPreviousMeetings);
+        buttonShowPrevious.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAll = !showAll;
+                updateList(3);
+            }
+        });
+
+
+        listView = (ListView) v.findViewById(R.id.listView);
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 
+
+        listView.setAdapter (listAdapter);
         listView.setMultiChoiceModeListener(this);
         listView.setOnItemClickListener(this);
-       // updateList();
+        updateList(3);
+
+        //Register for the event of a meeting being created, then refresh list
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                updateList(3);
+            }
+        }, new IntentFilter("meeting_created"));
 
         return v;
     }
@@ -150,30 +182,30 @@ public class MeetingFragment extends Fragment implements AbsListView.MultiChoice
     public void onResume() {
         super.onResume();
 
-        List<Meeting> valueList = new ArrayList<>(Base.app.dbManager.loadMeetings().values());
-//        titleBar = (TextView)getActivity().findViewById(R.id.recentAddedBarTextView);
-//        titleBar.setText(R.string.recentlyViewedLbl);
-//        ((TextView)getActivity().findViewById(R.id.empty_list_view)).setText(R.string.recentlyViewedEmptyMessage);
-        listAdapter = new MeetingListAdapter(getActivity(), this, valueList);
-//        coffeeFilter = new CoffeeFilter(Base.app.dbManager.getAll(),"all",listAdapter);
-        listAdapter.notifyDataSetChanged();
-
-
-
-       // ((TextView)getActivity().findViewById(R.id.empty_list_view)).setText(R.string.recentlyViewedEmptyMessage);
-//        //coffeeFilter = new CoffeeFilter(Base.app.dbManager.getAll(),"all",listAdapter);
-
-//        if (favourites) {
-//            titleBar.setText(R.string.favouritesCoffeeLbl);
-//            ((TextView)getActivity().findViewById(R.id.empty_list_view)).setText(R.string.favouritesEmptyMessage);
+//        List<Meeting> valueList = new ArrayList<>(updateList(3));
+////        titleBar = (TextView)getActivity().findViewById(R.id.recentAddedBarTextView);
+////        titleBar.setText(R.string.recentlyViewedLbl);
+////        ((TextView)getActivity().findViewById(R.id.empty_list_view)).setText(R.string.recentlyViewedEmptyMessage);
+//        listAdapter = new MeetingListAdapter(getActivity(), this, valueList);
+////        coffeeFilter = new CoffeeFilter(Base.app.dbManager.getAll(),"all",listAdapter);
 //
-//            coffeeFilter.setFilter("favourites"); // Set the filter text field from 'all' to 'favourites'
-//            coffeeFilter.filter(null); // Filter the data, but don't use any prefix
-//            listAdapter.notifyDataSetChanged(); // Update the adapter
-//        }
-       listView.setAdapter (listAdapter);
-       listView.setOnItemClickListener(this);
-       listView.setEmptyView(getActivity().findViewById(R.id.textViewNoMeetings));
+//
+//
+//
+//       // ((TextView)getActivity().findViewById(R.id.empty_list_view)).setText(R.string.recentlyViewedEmptyMessage);
+////        //coffeeFilter = new CoffeeFilter(Base.app.dbManager.getAll(),"all",listAdapter);
+//
+////        if (favourites) {
+////            titleBar.setText(R.string.favouritesCoffeeLbl);
+////            ((TextView)getActivity().findViewById(R.id.empty_list_view)).setText(R.string.favouritesEmptyMessage);
+////            coffeeFilter.setFilter("favourites"); // Set the filter text field from 'all' to 'favourites'
+////            coffeeFilter.filter(null); // Filter the data, but don't use any prefix
+////            listAdapter.notifyDataSetChanged(); // Update the adapter
+////        }
+//
+//       listView.setAdapter (listAdapter);
+//       listView.setOnItemClickListener(this);
+//       //listView.setEmptyView(getActivity().findViewById(R.id.textViewNoMeetings));
 
     }
 
@@ -224,6 +256,7 @@ public class MeetingFragment extends Fragment implements AbsListView.MultiChoice
         });
         AlertDialog alert = builder.create();
         alert.show();
+        onResume();
     }
 
     @Override
@@ -240,12 +273,14 @@ public class MeetingFragment extends Fragment implements AbsListView.MultiChoice
             public void onClick(DialogInterface dialog, int which) {
                 for (Integer index : selectedIndex) {
                     MeetingController.getInstance().deleteMeeting(listAdapter.getItem(index));
+
                 }
                 mode.finish();
             }
         });
         builder.setNegativeButton("Cancel", null);
         builder.show();
+
     }
 
     private void moveToDate(final ActionMode mode) {
@@ -269,6 +304,76 @@ public class MeetingFragment extends Fragment implements AbsListView.MultiChoice
             }
         }, meetingTemp.startDateTime.getYear(), meetingTemp.startDateTime.getMonthOfYear() - 1, meetingTemp.startDateTime.getDayOfMonth()).show();
     }
+
+
+    private void updateList(int i) {
+
+
+
+        meetings.clear();
+
+        switch (i) {
+            case 1:
+                textViewNoMeeting.setText("No Meetings Today");
+                meetings.addAll(MeetingController.getInstance().getMeetingsToday());
+                break;
+            case 2:
+                textViewNoMeeting.setText("No Meetings Tomorrow");
+                meetings.addAll(MeetingController.getInstance().getMeetingsTomorrow());
+                break;
+            case 3:
+                textViewNoMeeting.setText("No Meetings");
+                meetings.addAll(MeetingController.getInstance().meetings.values());
+                break;
+        }
+
+        List<Meeting> deleteList = new ArrayList<>();
+
+        for (Meeting meeting : meetings) {
+            if (meeting.endDateTime.isBeforeNow())
+                deleteList.add(meeting);
+        }
+
+
+        if (!showAll) {
+            meetings.removeAll(deleteList);
+
+            if (deleteList.size() == 0)
+                buttonShowPrevious.setVisibility(View.GONE);
+            else {
+                buttonShowPrevious.setVisibility(View.VISIBLE);
+                buttonShowPrevious.setText("Show Previous Meetings");
+            }
+        } else {
+            if (deleteList.size() == 0)
+                buttonShowPrevious.setVisibility(View.GONE);
+            else {
+                buttonShowPrevious.setVisibility(View.VISIBLE);
+                buttonShowPrevious.setText("Hide Previous Meetings");
+            }
+        }
+
+
+        Collections.sort(meetings, new Comparator<Meeting>() {
+            @Override
+            public int compare(Meeting lhs, Meeting rhs) {
+                return lhs.startDateTime.compareTo(rhs.startDateTime);
+            }
+        });
+
+
+        listAdapter.notifyDataSetChanged();
+
+        if (meetings.size() == 0)
+            textViewNoMeeting.setVisibility(View.VISIBLE);
+        else
+            textViewNoMeeting.setVisibility(View.GONE);
+
+}
+//    public enum MeetingListType implements Serializable {
+//        MEETING_LIST_TYPE_TODAY, MEETING_LIST_TYPE_TOMORROW, MEETING_LIST_TYPE_ALL
+//    }
+
 
 }
 

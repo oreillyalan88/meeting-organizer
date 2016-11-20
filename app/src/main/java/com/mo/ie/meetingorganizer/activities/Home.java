@@ -10,6 +10,7 @@
     import android.os.Bundle;
     import android.os.Handler;
     import android.support.annotation.NonNull;
+    import android.support.annotation.UiThread;
     import android.support.design.widget.FloatingActionButton;
     import android.support.design.widget.NavigationView;
     import android.support.v4.widget.DrawerLayout;
@@ -39,6 +40,7 @@
     import com.bumptech.glide.Glide;
     import com.bumptech.glide.load.engine.DiskCacheStrategy;
     import com.mo.ie.R;
+    import com.mo.ie.meetingorganizer.adapters.MeetingListAdapter;
     import com.mo.ie.meetingorganizer.controllers.MeetingController;
     import com.mo.ie.meetingorganizer.fragments.AddFragment;
     import com.mo.ie.meetingorganizer.fragments.EditFragment;
@@ -51,7 +53,11 @@
 
     import org.joda.time.MutableDateTime;
 
+    import java.util.ArrayList;
     import java.util.Calendar;
+    import java.util.Collections;
+    import java.util.Comparator;
+    import java.util.List;
 
 
     import static android.R.id.toggle;
@@ -439,7 +445,7 @@
 
             if (id == R.id.nav_home) {
                 fragment = MeetingFragment.newInstance();
-                ((MeetingFragment)fragment).favourites = false;
+
                 ft.replace(R.id.homeFrame, fragment);
                 ft.addToBackStack(null);
                 ft.commit();
@@ -449,6 +455,7 @@
                 ft.replace(R.id.homeFrame, fragment);
                 ft.addToBackStack(null);
                 ft.commit();
+
 
             } else if (id == R.id.nav_about_us) {
                 fragment = MeetingFragment.newInstance();
