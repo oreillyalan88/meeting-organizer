@@ -19,6 +19,7 @@ public class Base extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         app = (MeetingOrganizerApp) getApplication();
 
+
     }
 
     protected void goToActivity(Activity current,

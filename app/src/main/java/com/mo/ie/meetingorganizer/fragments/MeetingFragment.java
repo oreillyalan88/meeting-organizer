@@ -4,6 +4,7 @@ package com.mo.ie.meetingorganizer.fragments;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -118,6 +119,7 @@ public class MeetingFragment extends Fragment implements AbsListView.MultiChoice
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
     }
     @Override

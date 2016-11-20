@@ -12,31 +12,35 @@
     <color name="dark_gray">#757575</color>
     <color name="black_overlay">#66000000</color>
 
-    <color name="black">#000</color>
-    <color name="orange">#FA0</color>
-    <color name="white">#FFF</color>
+    <color name="colorPrimary1">#d32f2f</color>
+    <color name="colorPrimaryDark1">#c72c2c</color>
+    <color name="colorAccent1">#FFFFFF</color>
 
-    <color name="bgColor">#ffffff</color>
+    <!--<color name="black">#000</color>-->
+    <!--<color name="orange">#FA0</color>-->
+    <!--<color name="white">#FFF</color>-->
 
-
-
-    <color name="appBGColor">#f8f9ff</color>
-    <color name="headerBGColor">#45719B</color>
-    <color name="bannerBGColor">#45719B</color>
-    <color name="activeRowBGColor">#ffcc00</color>
-    <color name="activeBGColor">#149B9B</color>
-    <color name="inactiveBGColor">#000000</color>
-    <color name="appFooterBGColor">#dedede</color>
+    <!--<color name="bgColor">#ffffff</color>-->
 
 
 
+    <!--<color name="appBGColor">#f8f9ff</color>-->
+    <!--&lt;!&ndash;<color name="headerBGColor">#45719B</color>&ndash;&gt;-->
+    <!--&lt;!&ndash;<color name="bannerBGColor">#45719B</color>&ndash;&gt;-->
+    <!--<color name="activeRowBGColor">#ffcc00</color>-->
+    <!--&lt;!&ndash;<color name="activeBGColor">#149B9B</color>&ndash;&gt;-->
+    <!--<color name="inactiveBGColor">#000000</color>-->
+    <!--<color name="appFooterBGColor">#dedede</color>-->
 
-    <color name="appFontColor">#363737</color>
-    <color name="headerFontColor">#ffffff</color>
-    <color name="bannerFontColor">#ffffff</color>
-    <color name="activeFontColor">#ffffff</color>
-    <color name="inactiveFontColor">#cccccc</color>
-    <color name="pressedFontColor">#90b831</color>
-    <color name="appFooterFontColor">#606060</color>
-    <color name="textBGColor">#008FFE</color>
+
+
+
+    <!--<color name="appFontColor">#363737</color>-->
+    <!--<color name="headerFontColor">#ffffff</color>-->
+    <!--<color name="bannerFontColor">#ffffff</color>-->
+    <!--<color name="activeFontColor">#ffffff</color>-->
+    <!--<color name="inactiveFontColor">#cccccc</color>-->
+    <!--<color name="pressedFontColor">#90b831</color>-->
+    <!--<color name="appFooterFontColor">#606060</color>-->
+    <!--<color name="textBGColor">#008FFE</color>-->
 </resources>
