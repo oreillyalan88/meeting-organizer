@@ -24,7 +24,7 @@ public class MeetingListAdapter extends ArrayAdapter<Meeting>  {
         this.context = context;
         this.deleteListener = deleteListener;
         this.meetingList = meetingList;
-
+        notifyDataSetChanged();
 
     }
 
@@ -32,6 +32,7 @@ public class MeetingListAdapter extends ArrayAdapter<Meeting>  {
     public View getView(int position, View convertView, ViewGroup parent) {
         MeetingItem item = new MeetingItem(context, parent,deleteListener,meetingList.get(position));
         return item.view;
+
     }
 
     @Override
