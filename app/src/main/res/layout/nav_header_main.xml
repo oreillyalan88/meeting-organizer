@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
-        android:src="@mipmap/ic_launcher" />
+        android:src="@drawable/nav_menu_header_bg" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -27,6 +27,7 @@
             android:layout_width="@dimen/profile_width"
             android:layout_height="@dimen/profile_height"
             android:paddingTop="@dimen/nav_header_vertical_spacing"
+            android:background="@drawable/bg_circle"
             app:srcCompat="@android:drawable/sym_def_app_icon" />
 
         <TextView
@@ -34,12 +35,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/nav_header_vertical_spacing"
+            android:text="@string/app_name"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         <TextView
             android:id="@+id/website"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="@string/appWebsite" />
 
     </LinearLayout>
 </RelativeLayout>

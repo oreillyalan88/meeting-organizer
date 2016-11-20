@@ -102,8 +102,8 @@
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_home);
 
-//            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//            setSupportActionBar(toolbar);
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
             floatingActionButton = (FloatingActionButton) findViewById(fab);
             floatingActionButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -115,7 +115,7 @@
             drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
             mDrawerToggle = new ActionBarDrawerToggle(this, drawer,
-                    R.string.drawer_open, R.string.drawer_close) {
+                   toolbar, R.string.drawer_open, R.string.drawer_close) {
 
 
                 /** Called when a drawer has settled in a completely open state. */
