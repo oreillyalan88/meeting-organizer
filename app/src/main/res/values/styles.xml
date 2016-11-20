@@ -8,6 +8,8 @@
         <item name="android:actionModeBackground">@color/colorPrimaryDark</item>
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">true</item>
+        <item name="windowActionModeOverlay">true</item>
+       
     </style>
 
     <!--<style name="AppTheme.NoActionBar">-->

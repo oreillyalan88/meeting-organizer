@@ -24,7 +24,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ListView;
 import android.widget.TextView;
-
+import android.support.v7.app.ActionBarDrawerToggle;
 
 import com.mo.ie.R;
 import com.mo.ie.meetingorganizer.activities.Base;
@@ -80,6 +80,7 @@ public class MeetingFragment extends Fragment implements AbsListView.MultiChoice
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         MenuInflater inflater = mode.getMenuInflater();
         inflater.inflate(R.menu.main_action_menu, menu);
+
         this.mode = mode;
         return true;
     }
